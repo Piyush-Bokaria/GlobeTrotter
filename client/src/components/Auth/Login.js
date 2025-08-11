@@ -22,6 +22,11 @@ const Login = () => {
     setError('');
 
     try {
+      console.log('Sending login request:', {
+        email: formData.email,
+        password: '***'
+      });
+
       const response = await fetch('http://localhost:5000/apis/auth/login', {
         method: 'POST',
         headers: {
@@ -30,20 +35,33 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
 
-      if (response.ok) {
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        // Redirect to dashboard or home page
-        window.location.href = '/dashboard';
-      } else {
-        setError(data.message || 'Login failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          setError(errorData.message || 'Login failed');
+        } catch {
+          setError(`Server error: ${response.status}`);
+        }
+        return;
       }
+
+      const data = await response.json();
+      console.log('Success response:', data);
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      // Redirect to dashboard or home page
+      window.location.href = '/dashboard';
+
     } catch (error) {
-      setError('Network error. Please try again.');
+      console.error('Network error:', error);
+      setError(`Network error: ${error.message}. Make sure the server is running on port 5000.`);
     } finally {
       setLoading(false);
     }

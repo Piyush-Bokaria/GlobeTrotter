@@ -39,6 +39,12 @@ const SignUp = () => {
     }
 
     try {
+      console.log('Sending registration request:', {
+        name: formData.name,
+        email: formData.email,
+        password: '***'
+      });
+
       const response = await fetch('http://localhost:5000/apis/auth/register', {
         method: 'POST',
         headers: {
@@ -51,19 +57,32 @@ const SignUp = () => {
         }),
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
 
-      if (response.ok) {
-        setMessage(data.message);
-        // Redirect to OTP verification page
-        setTimeout(() => {
-          window.location.href = `/verify-otp?email=${formData.email}`;
-        }, 2000);
-      } else {
-        setError(data.message || 'Registration failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          setError(errorData.message || 'Registration failed');
+        } catch {
+          setError(`Server error: ${response.status}`);
+        }
+        return;
       }
+
+      const data = await response.json();
+      console.log('Success response:', data);
+
+      setMessage(data.message);
+      // Redirect to OTP verification page
+      setTimeout(() => {
+        window.location.href = `/verify-otp?email=${formData.email}`;
+      }, 2000);
+
     } catch (error) {
-      setError('Network error. Please try again.');
+      console.error('Network error:', error);
+      setError(`Network error: ${error.message}. Make sure the server is running on port 5000.`);
     } finally {
       setLoading(false);
     }

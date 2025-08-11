@@ -5,6 +5,14 @@ import nodemailer from "nodemailer";
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
+  
+  console.log('Register request received:', { name, email, password: '***' });
+  
+  // Validation
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+  
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -59,6 +67,14 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
+  
+  console.log('Login request received:', { email, password: '***' });
+  
+  // Validation
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+  
   try {
     const user = await User.findOne({ email });
     if (!user) {
