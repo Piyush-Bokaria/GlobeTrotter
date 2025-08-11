@@ -1,0 +1,125 @@
+body {
+  background: #18181a;
+  color: #e0e0e0;
+}
+.navbar {
+  background: #23232b !important;
+  box-shadow: 0 2px 7px rgba(100, 120, 200, 0.08);
+}
+.navbar-brand {
+  color: #63a4ff !important;
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.profile-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #63a4ff;
+}
+.welcome-banner {
+  background: linear-gradient(100deg, #23232b 80%, #3a8ef7 110%);
+  border-radius: 18px;
+  padding: 32px 16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.welcome-banner h1 {
+  color: #77b2ff;
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+.stats-box {
+  background: #23232b;
+  border-radius: 12px;
+  margin: 10px 8px;
+  padding: 16px 30px;
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #ffd700;
+}
+.btn-main {
+  background: #3a8ef7;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+}
+/* Floating button */
+.fab-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1050;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  border-radius: 50px;
+  padding: 12px 20px;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 14px;
+  margin-top: 20px;
+}
+.trip-card,
+.region-card {
+  background: #21212a;
+  border-radius: 14px;
+  box-shadow: 0 2px 15px rgba(30, 60, 120, 0.16);
+  margin-bottom: 20px;
+  padding: 0;
+}
+.trip-card img,
+.region-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+.card-body {
+  padding: 14px 18px;
+}
+.trip-tag,
+.region-tag {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  background: #3a8ef7;
+  font-size: 0.85rem;
+  color: #fff;
+  border-radius: 7px;
+  padding: 3px 12px;
+  font-weight: 600;
+}
+.visited-badge {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  background: #18d66b;
+  color: #fff;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.rating-star {
+  color: #ffbc4b;
+  font-size: 1.1rem;
+}
+@media (max-width: 768px) {
+  .welcome-banner h1 {
+    font-size: 1.25rem;
+  }
+  .stats-box {
+    font-size: 0.95rem;
+    padding: 10px 14px;
+  }
+  .trip-card img,
+  .region-card img {
+    height: 110px;
+  }
+}
