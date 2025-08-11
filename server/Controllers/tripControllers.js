@@ -1,5 +1,4 @@
 import Trip from "../models/Trip.js";
-import User from "../models/User.js";
 
 const createTrip = async (req, res) => {
   const {
@@ -118,9 +117,65 @@ const getTripById = async (req, res) => {
 
 const updateTrip = async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
+  const {
+    name,
+    description,
+    startDate,
+    endDate,
+    coverPhoto,
+    budget,
+    destination,
+  } = req.body;
+
+  console.log("Update trip request received:", {
+    id,
+    name,
+    description,
+    startDate,
+    endDate,
+    budget,
+    destination,
+  });
+
+  // Validate required fields
+  if (!name || !description || !startDate || !endDate) {
+    return res.status(400).json({
+      message: "Trip name, description, start date, and end date are required",
+    });
+  }
+
+  // Convert and validate dates
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Check if dates are valid
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({
+      message: "Invalid date format provided",
+    });
+  }
+
+  if (end <= start) {
+    return res.status(400).json({
+      message: "End date must be after start date",
+    });
+  }
 
   try {
+    const updates = {
+      name: name.trim(),
+      description: description.trim(),
+      startDate: start,
+      endDate: end,
+      budget: budget ? parseFloat(budget) : 0,
+      destination: destination ? destination.trim() : "",
+    };
+
+    // Only update coverPhoto if provided
+    if (coverPhoto !== undefined) {
+      updates.coverPhoto = coverPhoto;
+    }
+
     const trip = await Trip.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
@@ -136,6 +191,18 @@ const updateTrip = async (req, res) => {
     });
   } catch (error) {
     console.error("Update trip error:", error);
+
+    // Handle validation errors specifically
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: validationErrors,
+      });
+    }
+
     res.status(500).json({
       message: "Something went wrong while updating the trip.",
       error: error.message,

@@ -17,6 +17,7 @@ import EditTrip from "./components/Trips/EditTrip";
 import Profile from "./components/Profile/Profile";
 import ChangePassword from "./components/Profile/ChangePassword";
 import ItineraryBuilder from "./components/Itinerary/ItineraryBuilder";
+import ItineraryVisualization from "./components/ItineraryVisualization/ItineraryVisualization";
 import "./App.css";
 
 // Protected Route Component
@@ -111,6 +112,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ItineraryBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/itinerary/:tripId/view"
+            element={
+              <ProtectedRoute>
+                <ItineraryVisualization />
               </ProtectedRoute>
             }
           />

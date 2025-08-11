@@ -3,7 +3,7 @@ import Trip from "../models/Trip.js";
 
 const createItinerary = async (req, res) => {
   const { tripId, title, description } = req.body;
-  const userId = req.user?.id || '507f1f77bcf86cd799439011'; // Temporary fallback
+  const userId = req.user?.id || '507f1f77bcf86cd799439011';
   
   console.log('Create itinerary request received:', { tripId, title, description, userId });
   

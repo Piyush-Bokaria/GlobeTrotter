@@ -413,4 +413,56 @@ const sendPasswordResetEmail = async (email, otp) => {
   }
 };
 
-export { register, login, verifyOTP, changePassword, forgotPassword, verifyResetOTP, resetPassword, getAllUsers };
+const updateProfile = async (req, res) => {
+  const { email, firstName, lastName, phoneNumber, city, country, additionalInfo, profilePicture } = req.body;
+  
+  console.log('Update profile request received:', { email, firstName, lastName });
+  
+  if (!email || !firstName || !lastName) {
+    return res.status(400).json({ message: 'Email, first name, and last name are required' });
+  }
+  
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found.' });
+    }
+
+    user.firstName = firstName.trim();
+    user.lastName = lastName.trim();
+    user.name = `${firstName.trim()} ${lastName.trim()}`;
+    user.phoneNumber = phoneNumber ? phoneNumber.trim() : '';
+    user.city = city ? city.trim() : '';
+    user.country = country ? country.trim() : '';
+    user.additionalInfo = additionalInfo ? additionalInfo.trim() : '';
+    
+    if (profilePicture !== undefined) {
+      user.profilePicture = profilePicture;
+    }
+
+    await user.save();
+
+    const updatedUser = {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      city: user.city,
+      country: user.country,
+      additionalInfo: user.additionalInfo,
+      profilePicture: user.profilePicture
+    };
+
+    res.status(200).json({ 
+      message: 'Profile updated successfully!',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Something went wrong.', error: error.message });
+  }
+};
+
+export { register, login, verifyOTP, changePassword, forgotPassword, verifyResetOTP, resetPassword, updateProfile, getAllUsers };
