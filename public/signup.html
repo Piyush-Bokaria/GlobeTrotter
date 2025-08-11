@@ -1,0 +1,192 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Trotters - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Sign Up</h1>
+    <form id="signupForm">
+        <div class="form-group">
+            <label for="signup-username">Username</label>
+            <input type="text" id="signup-username" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" required>
+        </div>
+        <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" required>
+        </div>
+        <button type="submit">Send OTP</button>
+        <p class="signin-link">Already registered? <a href="login.html">Sign In</a></p>
+    </form>
+    <div id="otp-section" style="display:none;">
+        <h2>Enter OTP</h2>
+        <input type="text" id="signup-otp" maxlength="6" placeholder="Enter OTP">
+        <button id="verify-otp-btn">Verify OTP</button>
+    </div>
+</div>
+<script src="script-signup.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GlobalTrotter - Main Landing Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .banner-image {
+            background: linear-gradient(90deg,#34495e,#2980b9);
+            color: #fff;
+            border-radius: 15px;
+            height: 180px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+            font-family: 'Segoe Script', cursive;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-top: 16px;
+            margin-bottom: 10px;
+        }
+        .trip-card, .region-card {
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(30,60,120,.09);
+            border-radius: 10px;
+            transition: box-shadow .2s;
+            background: #fff;
+        }
+        .trip-card:hover, .region-card:hover {
+            box-shadow: 0 4px 16px rgba(41,128,185,.14);
+        }
+        .navbar {
+            box-shadow: 0 2px 7px rgba(100, 120, 200, .06);
+            margin-bottom: 10px;
+        }
+        @media (max-width: 600px) {
+            .banner-image { font-size: 1.6rem; height: 100px;}
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white px-3">
+        <a class="navbar-brand fw-bold text-primary" href="#" style="font-size: 1.6rem;"><i class="bi bi-globe"></i> GlobalTrotter</a>
+        <div class="ms-auto d-flex align-items-center">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle" style="font-size: 1.6rem;"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><span class="dropdown-item-text"><b>User:</b> Jane Doe</span></li>
+                    <li><span class="dropdown-item-text"><b>Email:</b> jane.doe@email.com</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <!-- Banner Image -->
+        <div class="banner-image mb-2 text-center">
+            Banner Image
+        </div>
+        
+        <!-- Search & Actions -->
+        <div class="row mb-2 gx-2">
+            <div class="col-12 col-md-6 mb-2 mb-md-0">
+                <input class="form-control" type="text" placeholder="Search destinations, trips..." id="searchBar">
+            </div>
+            <div class="col-12 col-md-6 d-flex justify-content-md-end gap-2">
+                <button class="btn btn-outline-primary"><i class="bi bi-columns-gap"></i> Group by</button>
+                <button class="btn btn-outline-secondary"><i class="bi bi-filter"></i> Filter</button>
+                <button class="btn btn-outline-info"><i class="bi bi-sort-alpha-down"></i> Sort by</button>
+            </div>
+        </div>
+        
+        <!-- Top Regional Selections -->
+        <div class="section-title">Top Regional Selections</div>
+        <div class="row gx-3 mb-3">
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <div class="region-card p-3 text-center">
+                    <img src="https://picsum.photos/seed/region1/80" class="rounded mb-2" alt="city" width="80">
+                    <div class="fw-bold">Paris</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <div class="region-card p-3 text-center">
+                    <img src="https://picsum.photos/seed/region2/80" class="rounded mb-2" alt="city" width="80">
+                    <div class="fw-bold">Tokyo</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <div class="region-card p-3 text-center">
+                    <img src="https://picsum.photos/seed/region3/80" class="rounded mb-2" alt="city" width="80">
+                    <div class="fw-bold">New York</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
+                <div class="region-card p-3 text-center">
+                    <img src="https://picsum.photos/seed/region4/80" class="rounded mb-2" alt="city" width="80">
+                    <div class="fw-bold">Sydney</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Previous Trips -->
+        <div class="section-title">Previous Trips</div>
+        <div class="row gx-3">
+            <div class="col-12 col-md-4 mb-3">
+                <div class="trip-card p-3">
+                    <div class="fw-bold fs-5 mb-2">Italy Adventure</div>
+                    <div><i class="bi bi-calendar-event"></i> Jun 2024</div>
+                    <div><i class="bi bi-currency-dollar"></i> $2100</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 mb-3">
+                <div class="trip-card p-3">
+                    <div class="fw-bold fs-5 mb-2">Bangkok & Phuket</div>
+                    <div><i class="bi bi-calendar-event"></i> Feb 2024</div>
+                    <div><i class="bi bi-currency-dollar"></i> $850</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 mb-3">
+                <div class="trip-card p-3">
+                    <div class="fw-bold fs-5 mb-2">USA Roadtrip</div>
+                    <div><i class="bi bi-calendar-event"></i> Nov 2023</div>
+                    <div><i class="bi bi-currency-dollar"></i> $1900</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-success btn-lg"><i class="bi bi-plus-circle"></i> Plan a trip</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function logout() {
+            alert('Logout clicked!');
+            // Redirect to login or handle logout logic here
+        }
+    </script>
+</body>
+</html>
