@@ -8,7 +8,15 @@ import {
 import Login from "./components/Auth/Login";
 import SignUp from "./components/Auth/SignUp";
 import VerifyOTP from "./components/Auth/VerifyOTP";
+import ForgotPassword from "./components/Auth/ForgotPassword";
+import ResetPassword from "./components/Auth/ResetPassword";
 import Dashboard from "./components/Dashboard";
+import CreateTrip from "./components/Trips/CreateTrip";
+import TripsList from "./components/Trips/TripsList";
+import EditTrip from "./components/Trips/EditTrip";
+import Profile from "./components/Profile/Profile";
+import ChangePassword from "./components/Profile/ChangePassword";
+import ItineraryBuilder from "./components/Itinerary/ItineraryBuilder";
 import "./App.css";
 
 // Protected Route Component
@@ -46,6 +54,8 @@ function App() {
             }
           />
           <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Routes */}
           <Route
@@ -53,6 +63,54 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-trip"
+            element={
+              <ProtectedRoute>
+                <CreateTrip />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <TripsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trips/:tripId/edit"
+            element={
+              <ProtectedRoute>
+                <EditTrip />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/itinerary/:tripId"
+            element={
+              <ProtectedRoute>
+                <ItineraryBuilder />
               </ProtectedRoute>
             }
           />
