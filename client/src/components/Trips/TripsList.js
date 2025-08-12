@@ -538,10 +538,10 @@ const TripsCategories = ({
                 )}
               </button>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Link
                 to={`/trips/${trip._id}/edit`}
-                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
+                className="bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
               >
                 <svg
                   className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
@@ -557,6 +557,25 @@ const TripsCategories = ({
                   />
                 </svg>
                 Edit
+              </Link>
+              <Link
+                to={`/trip/${trip._id}/budget`}
+                className="bg-green-100 hover:bg-green-200 text-green-700 text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
+              >
+                <svg
+                  className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                  />
+                </svg>
+                Budget
               </Link>
               <button
                 onClick={() => deleteTrip(trip._id, trip.name)}

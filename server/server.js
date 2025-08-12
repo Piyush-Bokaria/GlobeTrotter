@@ -35,6 +35,15 @@ app.use("/apis/activity-templates", activityTemplateRoutes);
 app.use("/apis/activities", activityRoutes);
 app.use("/apis/user-activity", userActivityRoutes);
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Public itinerary route
 app.get("/apis/public/itinerary/:tripId", async (req, res, next) => {
   try {
