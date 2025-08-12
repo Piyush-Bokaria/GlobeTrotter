@@ -1,0 +1,256 @@
+/* Create Trip Form Styles */
+/* Profile Dropdown (custom, for navbar) */
+.custom-profile-dropdown {
+  min-width: 245px;
+  max-width: 270px;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 7px 36px rgba(40, 40, 79, 0.13);
+  position: absolute;
+  top: 65px;
+  right: 2px;
+  padding: 20px 18px 10px 18px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation-duration: 0.22s;
+  border: 1.5px solid #f1f2ff;
+}
+
+.profile-circle {
+  border-radius: 50%;
+  background: #191a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.profile-menu-header {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.profile-view-btn {
+  color: #3267d3;
+  text-decoration: underline !important;
+  font-weight: 600;
+  font-size: 1.03em;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  transition: color 0.2s;
+}
+.profile-view-btn:hover {
+  color: #174de6 !important;
+  text-decoration: underline !important;
+}
+
+.nav-signout-link {
+  align-self: center;
+  margin-left: 16px;
+  margin-top: 2px;
+}
+.nav-signout-link a {
+  color: #4c4d63 !important;
+  font-weight: 500;
+}
+.nav-signout-link a:hover {
+  color: #d63031 !important;
+  text-decoration: underline;
+}
+
+
+/* Remove Bootstrap's default dropdown caret for profile */
+.profile-img-wrapper .dropdown-toggle::after {
+  display: none !important;
+}
+
+
+.trip-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: none;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.trip-card .card-header {
+  background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+  color: white;
+  font-weight: 600;
+  border-radius: 15px 15px 0 0 !important;
+  padding: 20px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2d3436;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.form-control {
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 15px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  background: #ffffff;
+}
+
+.form-control::placeholder {
+  color: #b2bec3;
+}
+
+/* Custom styling for date inputs */
+.form-control[type="date"] {
+  background: #ffffff;
+}
+
+.form-control[type="date"]:focus {
+  background: #ffffff;
+}
+
+/* Custom styling for file input */
+.form-control[type="file"] {
+  padding: 10px;
+  background: #f8f9fa;
+}
+
+.form-control[type="file"]:focus {
+  background: #f8f9fa;
+}
+
+/* Textarea styling */
+.form-control[rows] {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Button styling */
+.btn-success {
+  background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+}
+
+/* New Suggestions Section */
+.suggestion-section {
+  width: 100%;
+  background: #23243b;
+  margin-top: auto;
+  padding-top: 20px;
+  padding-bottom: 0;
+  box-shadow: 0 -2px 18px rgba(0,0,0,0.08);
+}
+
+.suggestion-panel {
+  background: #191a2e;
+  border-radius: 16px 16px 0 0;
+  color: #fff;
+  max-width: 1050px;
+  width: 100%;
+  border: none;
+}
+
+.suggestion-header {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 16px 18px;
+  color: #fff;
+}
+
+.suggestion-card.new {
+  background: #22233f;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.suggestion-card.new:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.suggestion-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.suggestion-card.new:hover .suggestion-img {
+  transform: scale(1.08);
+}
+
+.suggestion-info {
+  padding: 8px 10px;
+}
+
+.suggestion-info h6 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.suggestion-info p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #bdbddd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .suggestion-img {
+    height: 90px;
+  }
+  .suggestion-info h6 {
+    font-size: 0.85rem;
+  }
+  .suggestion-info p {
+    font-size: 0.72rem;
+  }
+  
+  .trip-card .card-header {
+    padding: 15px;
+  }
+  
+  .form-control {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .btn-success {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}

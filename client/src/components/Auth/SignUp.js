@@ -1,70 +1,65 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "../../styles/App.css";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setMessage('');
+    setError("");
+    setMessage("");
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
-
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Sending registration request:', {
-        name: formData.name,
-        email: formData.email,
-        password: '***'
-      });
-
-      const response = await fetch('http://localhost:5000/apis/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("http://localhost:5000/apis/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         }),
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('Error response:', errorText);
         try {
           const errorData = JSON.parse(errorText);
-          setError(errorData.message || 'Registration failed');
+          setError(errorData.message || "Registration failed");
         } catch {
           setError(`Server error: ${response.status}`);
         }
@@ -72,132 +67,201 @@ const SignUp = () => {
       }
 
       const data = await response.json();
-      console.log('Success response:', data);
-
       setMessage(data.message);
-      // Redirect to OTP verification page
-      setTimeout(() => {
-        window.location.href = `/verify-otp?email=${formData.email}`;
-      }, 2000);
 
+      // Navigate to OTP page after 2s
+      setTimeout(() => {
+        navigate(`/verify-otp?email=${formData.email}`);
+      }, 2000);
     } catch (error) {
-      console.error('Network error:', error);
-      setError(`Network error: ${error.message}. Make sure the server is running on port 5000.`);
+      setError(
+        `Network error: ${error.message}. Make sure the server is running on port 5000.`
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Join GlobeTrotter today
-          </p>
+    <div className="login-container">
+      {/* Background Animation */}
+      <div className="login-bg-animation">
+        <div className="bg-circle bg-circle-1"></div>
+        <div className="bg-circle bg-circle-2"></div>
+        <div className="bg-circle bg-circle-3"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="login-content">
+        {/* Left Side - Illustration */}
+        <div className="login-illustration">
+          <div className="illustration-container">
+            <div className="travel-icons">
+              <i className="bi bi-airplane"></i>
+              <i className="bi bi-geo-alt"></i>
+              <i className="bi bi-suitcase-lg"></i>
+              <i className="bi bi-camera"></i>
+            </div>
+            <h1>Join <span>GlobalTrotter</span></h1>
+            <p>Start your journey with us and explore the world like never before.</p>
+            <div className="features-list">
+              <div className="feature-item">
+                <i className="bi bi-check-circle"></i>
+                <span>Create your travel profile</span>
+              </div>
+              <div className="feature-item">
+                <i className="bi bi-check-circle"></i>
+                <span>Get personalized recommendations</span>
+              </div>
+              <div className="feature-item">
+                <i className="bi bi-check-circle"></i>
+                <span>Connect with fellow travelers</span>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your full name"
-                value={formData.name}
-                onChange={handleChange}
-              />
+
+        {/* Right Side - Sign Up Form */}
+        <div className="login-form-container">
+          <div className="login-form-card animate__animated animate__fadeInRight">
+            <div className="form-header">
+              <div className="logo">
+                <i className="bi bi-globe2"></i>
+                <span>GlobalTrotter</span>
+              </div>
+              <h2>Create Account</h2>
+              <p>Fill in the details below to get started</p>
             </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+
+            <form onSubmit={handleSubmit} className="login-form">
+              {error && (
+                <div className="alert alert-danger">
+                  <i className="bi bi-exclamation-triangle-fill"></i> {error}
+                </div>
+              )}
+              {message && (
+                <div className="alert alert-success">
+                  <i className="bi bi-check-circle-fill"></i> {message}
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-person"></i>
+                  </span>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    className="form-control"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-envelope"></i>
+                  </span>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="form-control"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-lock"></i>
+                  </span>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    className="form-control"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="input-group-text toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <i className={`bi bi-eye${showPassword ? "-slash" : ""}`}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-lock"></i>
+                  </span>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    className="form-control"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="input-group-text toggle-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <i className={`bi bi-eye${showConfirmPassword ? "-slash" : ""}`}></i>
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary login-btn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-person-plus-fill me-2"></i>
+                    Sign Up
+                  </>
+                )}
+              </button>
+
+              <div className="signup-link">
+                Already have an account?{" "}
+                <Link to="/login" className="signup-text">
+                  Sign In
+                </Link>
+              </div>
+            </form>
           </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-
-          {message && (
-            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">
-              {message}
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating Account...' : 'Sign Up'}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign in
-              </Link>
-            </span>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

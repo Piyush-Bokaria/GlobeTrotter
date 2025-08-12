@@ -1,0 +1,10 @@
+.dashboard-bg {
+  background: linear-gradient(to bottom right, #f8fafd, #eef4fb);
+}
+
+.stat-card:hover, .action-card:hover {
+  transform: translateY(-4px);
+  transition: 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+}
+
