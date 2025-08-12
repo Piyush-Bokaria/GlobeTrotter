@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import nodemailer from "nodemailer";
 
@@ -36,6 +37,7 @@ const register = async (req, res) => {
       password: hashedPassword,
       otp,
       otpExpires,
+      role: "user", // Default role
     });
 
     await newUser.save();
@@ -57,7 +59,7 @@ const register = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Something went wrong.", error: error.message });
+      .json({ message: "1.Something went wrong.", error: error.message });
   }
 };
 
@@ -88,18 +90,27 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password." });
     }
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+
     res.status(200).json({
       message: "Login successful!",
+      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Something went wrong.", error: error.message });
+      .json({ message: "2.Something went wrong.", error: error.message });
   }
 };
 
@@ -129,7 +140,7 @@ const verifyOTP = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Something went wrong.", error: error.message });
+      .json({ message: "3.Something went wrong.", error: error.message });
   }
 };
 
@@ -231,7 +242,7 @@ const changePassword = async (req, res) => {
     console.error("Change password error:", error);
     res
       .status(500)
-      .json({ message: "Something went wrong.", error: error.message });
+      .json({ message: "4.Something went wrong.", error: error.message });
   }
 };
 
@@ -246,33 +257,36 @@ const getAllUsers = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Something went wrong.", error: error.message });
+      .json({ message: "5.Something went wrong.", error: error.message });
   }
 };
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  
-  console.log('Forgot password request received:', { email });
-  
+
+  console.log("Forgot password request received:", { email });
+
   // Validation
   if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
+    return res.status(400).json({ message: "Email is required" });
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
       // Don't reveal if user exists or not for security
-      return res.status(200).json({ message: 'If an account with this email exists, you will receive a password reset OTP.' });
+      return res.status(200).json({
+        message:
+          "If an account with this email exists, you will receive a password reset OTP.",
+      });
     }
 
     // Generate OTP
-    const otp = otpGenerator.generate(6, { 
-      digits: true, 
-      upperCaseAlphabets: false, 
-      lowerCaseAlphabets: false, 
-      specialChars: false 
+    const otp = otpGenerator.generate(6, {
+      digits: true,
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
     });
     const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
@@ -284,68 +298,85 @@ const forgotPassword = async (req, res) => {
     // Send OTP email
     await sendPasswordResetEmail(email, otp);
 
-    res.status(200).json({ message: 'If an account with this email exists, you will receive a password reset OTP.' });
+    res.status(200).json({
+      message:
+        "If an account with this email exists, you will receive a password reset OTP.",
+    });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Something went wrong.', error: error.message });
+    console.error("Forgot password error:", error);
+    res
+      .status(500)
+      .json({ message: "6.Something went wrong.", error: error.message });
   }
 };
 
 const verifyResetOTP = async (req, res) => {
   const { email, otp } = req.body;
-  
-  console.log('Verify reset OTP request received:', { email, otp });
-  
+
+  console.log("Verify reset OTP request received:", { email, otp });
+
   // Validation
   if (!email || !otp) {
-    return res.status(400).json({ message: 'Email and OTP are required' });
+    return res.status(400).json({ message: "Email and OTP are required" });
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email or OTP.' });
+      return res.status(400).json({ message: "Invalid email or OTP." });
     }
 
     if (user.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid email or OTP.' });
+      return res.status(400).json({ message: "Invalid email or OTP." });
     }
 
     if (user.otpExpires < Date.now()) {
-      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+      return res
+        .status(400)
+        .json({ message: "OTP has expired. Please request a new one." });
     }
 
     // OTP is valid - don't clear it yet, we'll clear it after password reset
-    res.status(200).json({ message: 'OTP verified successfully. You can now reset your password.' });
+    res.status(200).json({
+      message: "OTP verified successfully. You can now reset your password.",
+    });
   } catch (error) {
-    console.error('Verify reset OTP error:', error);
-    res.status(500).json({ message: 'Something went wrong.', error: error.message });
+    console.error("Verify reset OTP error:", error);
+    res
+      .status(500)
+      .json({ message: "7.Something went wrong.", error: error.message });
   }
 };
 
 const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
-  
-  console.log('Reset password request received:', { email, otp, newPassword: '***' });
-  
+
+  console.log("Reset password request received:", {
+    email,
+    otp,
+    newPassword: "***",
+  });
+
   // Validation
   if (!email || !otp || !newPassword) {
-    return res.status(400).json({ message: 'All fields are required' });
+    return res.status(400).json({ message: "All fields are required" });
   }
-  
+
   if (newPassword.length < 6) {
-    return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+    return res
+      .status(400)
+      .json({ message: "New password must be at least 6 characters long" });
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid request.' });
+      return res.status(400).json({ message: "Invalid request." });
     }
 
     // Verify OTP again
     if (user.otp !== otp || user.otpExpires < Date.now()) {
-      return res.status(400).json({ message: 'Invalid or expired OTP.' });
+      return res.status(400).json({ message: "Invalid or expired OTP." });
     }
 
     // Hash new password
@@ -358,17 +389,19 @@ const resetPassword = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    res.status(200).json({ message: 'Password reset successfully!' });
+    res.status(200).json({ message: "Password reset successfully!" });
   } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Something went wrong.', error: error.message });
+    console.error("Reset password error:", error);
+    res
+      .status(500)
+      .json({ message: "8.Something went wrong.", error: error.message });
   }
 };
 
 const sendPasswordResetEmail = async (email, otp) => {
   try {
-    console.log('Attempting to send password reset email to:', email);
-    
+    console.log("Attempting to send password reset email to:", email);
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -382,7 +415,7 @@ const sendPasswordResetEmail = async (email, otp) => {
 
     // Verify transporter configuration
     await transporter.verify();
-    console.log('Transporter verified successfully');
+    console.log("Transporter verified successfully");
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -405,37 +438,51 @@ const sendPasswordResetEmail = async (email, otp) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent successfully:', result.messageId);
-    
+    console.log("Password reset email sent successfully:", result.messageId);
   } catch (error) {
-    console.error('Password reset email sending failed:', error);
+    console.error("Password reset email sending failed:", error);
     throw new Error(`Failed to send password reset email: ${error.message}`);
   }
 };
 
 const updateProfile = async (req, res) => {
-  const { email, firstName, lastName, phoneNumber, city, country, additionalInfo, profilePicture } = req.body;
-  
-  console.log('Update profile request received:', { email, firstName, lastName });
-  
+  const {
+    email,
+    firstName,
+    lastName,
+    phoneNumber,
+    city,
+    country,
+    additionalInfo,
+    profilePicture,
+  } = req.body;
+
+  console.log("Update profile request received:", {
+    email,
+    firstName,
+    lastName,
+  });
+
   if (!email || !firstName || !lastName) {
-    return res.status(400).json({ message: 'Email, first name, and last name are required' });
+    return res
+      .status(400)
+      .json({ message: "Email, first name, and last name are required" });
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'User not found.' });
+      return res.status(400).json({ message: "User not found." });
     }
 
     user.firstName = firstName.trim();
     user.lastName = lastName.trim();
     user.name = `${firstName.trim()} ${lastName.trim()}`;
-    user.phoneNumber = phoneNumber ? phoneNumber.trim() : '';
-    user.city = city ? city.trim() : '';
-    user.country = country ? country.trim() : '';
-    user.additionalInfo = additionalInfo ? additionalInfo.trim() : '';
-    
+    user.phoneNumber = phoneNumber ? phoneNumber.trim() : "";
+    user.city = city ? city.trim() : "";
+    user.country = country ? country.trim() : "";
+    user.additionalInfo = additionalInfo ? additionalInfo.trim() : "";
+
     if (profilePicture !== undefined) {
       user.profilePicture = profilePicture;
     }
@@ -452,17 +499,124 @@ const updateProfile = async (req, res) => {
       city: user.city,
       country: user.country,
       additionalInfo: user.additionalInfo,
-      profilePicture: user.profilePicture
+      profilePicture: user.profilePicture,
     };
 
-    res.status(200).json({ 
-      message: 'Profile updated successfully!',
-      user: updatedUser
+    res.status(200).json({
+      message: "Profile updated successfully!",
+      user: updatedUser,
     });
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ message: 'Something went wrong.', error: error.message });
+    console.error("Update profile error:", error);
+    res
+      .status(500)
+      .json({ message: "9.Something went wrong.", error: error.message });
   }
 };
 
-export { register, login, verifyOTP, changePassword, forgotPassword, verifyResetOTP, resetPassword, updateProfile, getAllUsers };
+const registerAdmin = async (req, res) => {
+  const { name, email, password, adminKey } = req.body;
+
+  console.log("Admin register request received:", {
+    name,
+    email,
+    password: "***",
+    adminKey: "***",
+  });
+
+  // Simple admin key check (in production, use environment variable)
+  const ADMIN_KEY = process.env.ADMIN_REGISTRATION_KEY || "admin123";
+  if (adminKey !== ADMIN_KEY) {
+    return res.status(403).json({ message: "Invalid admin registration key" });
+  }
+
+  // Validation
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists." });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newAdmin = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: "admin",
+      isVerified: true, // Auto-verify admin accounts
+    });
+
+    await newAdmin.save();
+
+    // Generate JWT token for admin
+    const token = jwt.sign(
+      { id: newAdmin._id, email: newAdmin.email, role: newAdmin.role },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      message: "Admin account created successfully!",
+      token,
+      user: {
+        id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        role: newAdmin.role,
+      },
+    });
+  } catch (error) {
+    console.error("Admin registration error:", error);
+    res.status(500).json({
+      message: "Something went wrong during admin registration.",
+      error: error.message,
+    });
+  }
+};
+
+const debugUser = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const user = await User.findOne({ email }).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User found",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching user", error: error.message });
+  }
+};
+
+export {
+  register,
+  login,
+  verifyOTP,
+  changePassword,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
+  updateProfile,
+  getAllUsers,
+  registerAdmin,
+  debugUser,
+};

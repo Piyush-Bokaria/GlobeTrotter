@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+// removed unused CitySearch import
 
 const ItineraryBuilder = () => {
   const { tripId } = useParams();
@@ -243,6 +244,7 @@ const ItineraryBuilder = () => {
       </div>
     );
   }
+  // removed unused handleAddCity
 
   return (
     <div className="min-h-screen bg-gray-50">

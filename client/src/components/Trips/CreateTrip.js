@@ -105,6 +105,14 @@ const CreateTrip = () => {
         });
       }
 
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("Please log in to create a trip.");
+        setLoading(false);
+        return;
+      }
+
       const tripData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -113,6 +121,7 @@ const CreateTrip = () => {
         budget: formData.budget ? parseFloat(formData.budget) : 0,
         destination: formData.destination.trim(),
         coverPhoto: photoData,
+        // No need to send userId - it will be extracted from JWT token
       };
 
       console.log("Sending create trip request:", tripData);
@@ -121,6 +130,7 @@ const CreateTrip = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Send JWT token
         },
         body: JSON.stringify(tripData),
       });
@@ -210,9 +220,9 @@ const CreateTrip = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white rounded-lg shadow p-6">
+      <main className="max-w-3xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-4 sm:py-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900">
                 Create New Trip
@@ -264,7 +274,7 @@ const CreateTrip = () => {
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="startDate"

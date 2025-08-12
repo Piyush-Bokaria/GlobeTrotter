@@ -10,7 +10,9 @@ const createTrip = async (req, res) => {
     budget,
     destination,
   } = req.body;
-  const userId = req.user?.id;
+
+  // Get userId from authenticated user (set by auth middleware)
+  const userId = req.user.id;
 
   console.log("Create trip request received:", {
     name,
@@ -52,7 +54,7 @@ const createTrip = async (req, res) => {
       startDate: start,
       endDate: end,
       coverPhoto,
-      userId: userId || "507f1f77bcf86cd799439011", // Temporary fallback
+      userId: userId,
       budget: budget || 0,
       destination: destination || "",
     });
@@ -73,10 +75,15 @@ const createTrip = async (req, res) => {
 };
 
 const getUserTrips = async (req, res) => {
-  const userId = req.user?.id || "507f1f77bcf86cd799439011"; // Temporary fallback
+  // Get userId from authenticated user (set by auth middleware)
+  const userId = req.user.id;
+
+  console.log("Get trips request for userId:", userId);
 
   try {
     const trips = await Trip.find({ userId }).sort({ createdAt: -1 });
+
+    console.log(`Found ${trips.length} trips for user ${userId}`);
 
     res.status(200).json({
       message: "Trips retrieved successfully",
@@ -94,12 +101,21 @@ const getUserTrips = async (req, res) => {
 
 const getTripById = async (req, res) => {
   const { id } = req.params;
+  // Get userId from authenticated user (optional for this endpoint)
+  const userId = req.user?.id;
 
   try {
     const trip = await Trip.findById(id);
 
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
+    }
+
+    // Check ownership for private trips
+    if (userId && trip.userId.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You can only view your own trips." });
     }
 
     res.status(200).json({
@@ -126,6 +142,9 @@ const updateTrip = async (req, res) => {
     budget,
     destination,
   } = req.body;
+
+  // Get userId from authenticated user (set by auth middleware)
+  const userId = req.user.id;
 
   console.log("Update trip request received:", {
     id,
@@ -176,14 +195,22 @@ const updateTrip = async (req, res) => {
       updates.coverPhoto = coverPhoto;
     }
 
+    // First check if trip exists and belongs to user
+    const existingTrip = await Trip.findById(id);
+    if (!existingTrip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    if (existingTrip.userId.toString() !== userId) {
+      return res.status(403).json({
+        message: "Access denied. You can only update your own trips.",
+      });
+    }
+
     const trip = await Trip.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
     });
-
-    if (!trip) {
-      return res.status(404).json({ message: "Trip not found" });
-    }
 
     res.status(200).json({
       message: "Trip updated successfully",
@@ -212,13 +239,23 @@ const updateTrip = async (req, res) => {
 
 const deleteTrip = async (req, res) => {
   const { id } = req.params;
+  // Get userId from authenticated user (set by auth middleware)
+  const userId = req.user.id;
 
   try {
-    const trip = await Trip.findByIdAndDelete(id);
-
-    if (!trip) {
+    // First check if trip exists and belongs to user
+    const existingTrip = await Trip.findById(id);
+    if (!existingTrip) {
       return res.status(404).json({ message: "Trip not found" });
     }
+
+    if (existingTrip.userId.toString() !== userId) {
+      return res.status(403).json({
+        message: "Access denied. You can only delete your own trips.",
+      });
+    }
+
+    const trip = await Trip.findByIdAndDelete(id);
 
     res.status(200).json({
       message: "Trip deleted successfully",

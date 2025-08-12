@@ -11,9 +11,7 @@ const DaySection = ({ day, viewMode, isActive, onActivityClick }) => {
     });
   };
 
-  const getDayOfWeek = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-  };
+  // removed unused getDayOfWeek
 
   const sortActivitiesByTime = (activities) => {
     return [...activities].sort((a, b) => {

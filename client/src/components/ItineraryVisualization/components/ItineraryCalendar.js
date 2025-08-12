@@ -17,24 +17,7 @@ const ItineraryCalendar = ({ tripData, selectedDay, onActivityClick }) => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const getActivityPosition = (activity) => {
-    if (!activity.startTime) return null;
-    
-    const [hours, minutes] = activity.startTime.split(':');
-    const startHour = parseInt(hours);
-    const startMinutes = parseInt(minutes);
-    
-    // Calculate position based on 6 AM start (index 0)
-    const hourIndex = startHour - 6;
-    if (hourIndex < 0 || hourIndex >= timeSlots.length) return null;
-    
-    const minuteOffset = (startMinutes / 60) * 100; // Convert to percentage of hour
-    
-    return {
-      top: `${(hourIndex * 100) + (minuteOffset / 60 * 100)}px`,
-      height: activity.duration ? `${(activity.duration / 60) * 100}px` : '100px'
-    };
-  };
+  // removed unused getActivityPosition
 
   const getActivitiesForTimeSlot = (timeSlot, day) => {
     return day.activities.filter(activity => {

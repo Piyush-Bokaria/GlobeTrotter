@@ -7,9 +7,7 @@ const CityHeader = ({ city, duration, activities }) => {
     }, 0);
   };
 
-  const getTotalCount = () => {
-    return activities
-  }
+  // removed unused getTotalCount
 
   const getCityIcon = (cityName) => {
     // You could implement a more sophisticated city icon mapping

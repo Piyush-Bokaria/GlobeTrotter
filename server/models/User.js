@@ -3,12 +3,10 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
-        required: true,
         trim: true
     },
     lastName: {
         type: String,
-        required: true,
         trim: true
     },
     name: {
@@ -47,6 +45,11 @@ const userSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false,
+    },
+    role:{
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user',
     },
     otp: String,
     otpExpires: Date,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import activityTracker from "../utils/activityTracker";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -23,10 +24,18 @@ const Dashboard = () => {
 
   const fetchTripStats = async () => {
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
       const response = await fetch("http://localhost:5000/apis/trips/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Send JWT token
         },
       });
 
@@ -58,8 +67,16 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
+    // Track logout before clearing data
+    activityTracker.track('logout', {
+      userRole: user?.role,
+      sessionDuration: Date.now() - (activityTracker.sessionStartTime || Date.now())
+    }, { immediate: true });
+    
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
@@ -71,6 +88,11 @@ const Dashboard = () => {
     );
   }
 
+  if (user.type === "admin") {
+    // redirect to admin dashboard
+    window.location.href = "/admin-dashboard";
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -78,18 +100,19 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                 GlobeTrotter
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.name}!</span>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="hidden sm:block text-gray-700">Welcome, {user.name}!</span>
+              <span className="sm:hidden text-gray-700 text-sm">Hi, {user.name.split(' ')[0]}!</span>
               <a
                 href="/profile"
-                className="flex items-center text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="flex items-center text-gray-700 hover:text-indigo-600 px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
               >
                 <svg
-                  className="w-5 h-5 mr-1"
+                  className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -101,11 +124,11 @@ const Dashboard = () => {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                Profile
+                <span className="hidden sm:inline">Profile</span>
               </a>
               <button
                 onClick={handleLogout}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium"
               >
                 Logout
               </button>
@@ -115,9 +138,9 @@ const Dashboard = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-4 sm:py-6">
+          <div className="border-2 sm:border-4 border-dashed border-gray-200 rounded-lg p-4 sm:p-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Welcome to GlobeTrotter Dashboard!
@@ -198,9 +221,17 @@ const Dashboard = () => {
                   <p className="text-gray-600 mb-4">
                     Discover new destinations and experiences
                   </p>
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    Explore
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a href="/explore-public" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                      Explore Public Itineraries
+                    </a>
+                    <a href="/search-cities" className="inline-block bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-md text-sm font-medium">
+                      Search Cities
+                    </a>
+                    <a href="/search-activities" className="inline-block bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-sm font-medium">
+                      Search Activities
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

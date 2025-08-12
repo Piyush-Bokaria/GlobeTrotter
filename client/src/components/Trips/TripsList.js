@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useActivityTracker } from "../../hooks/useActivityTracker";
 
 const TripsList = () => {
   const [trips, setTrips] = useState([]);
@@ -7,16 +8,30 @@ const TripsList = () => {
   const [error, setError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(null);
 
+  // Activity tracking
+  const { trackTripAction, trackError, trackFeatureUsage } = useActivityTracker();
+
   useEffect(() => {
     fetchTrips();
   }, []);
 
   const fetchTrips = async () => {
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("Please log in to view your trips.");
+        setLoading(false);
+        return;
+      }
+
+      console.log('Fetching trips with authentication token');
+
       const response = await fetch("http://localhost:5000/apis/trips/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Send JWT token
         },
       });
 
@@ -25,6 +40,7 @@ const TripsList = () => {
       }
 
       const data = await response.json();
+      console.log('Received trips:', data.trips?.length || 0);
       setTrips(data.trips || []);
     } catch (error) {
       console.error("Error fetching trips:", error);
@@ -89,15 +105,32 @@ const TripsList = () => {
         `Are you sure you want to delete "${tripName}"? This action cannot be undone.`
       )
     ) {
+      // Track cancelled deletion
+      trackTripAction("delete_cancelled", tripId, tripName);
+      return;
+    }
+
+    // Get token from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError("Please log in to delete trips.");
+      trackError("auth_error", "No token found for trip deletion", null, { tripId, tripName });
       return;
     }
 
     setDeleteLoading(tripId);
     try {
+      // Track deletion attempt
+      trackTripAction("delete_attempt", tripId, tripName);
+      
       const response = await fetch(
         `http://localhost:5000/apis/trips/${tripId}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // Send JWT token
+          },
         }
       );
 
@@ -117,20 +150,7 @@ const TripsList = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "planning":
-        return "bg-blue-100 text-blue-800";
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // removed unused getStatusColor
 
   const getTripStatus = (trip) => {
     const today = new Date();
@@ -179,24 +199,24 @@ const TripsList = () => {
             <div className="flex items-center">
               <Link
                 to="/dashboard"
-                className="text-xl font-semibold text-gray-900"
+                className="text-lg sm:text-xl font-semibold text-gray-900"
               >
                 GlobeTrotter
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link
                 to="/dashboard"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="hidden sm:block text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Dashboard
               </Link>
               <Link
                 to="/profile"
-                className="flex items-center text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="flex items-center text-gray-700 hover:text-indigo-600 px-2 sm:px-3 py-2 rounded-md text-sm font-medium"
               >
                 <svg
-                  className="w-4 h-4 mr-1"
+                  className="w-4 h-4 sm:mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -208,13 +228,14 @@ const TripsList = () => {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                Profile
+                <span className="hidden sm:inline">Profile</span>
               </Link>
               <Link
                 to="/create-trip"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium"
               >
-                Create Trip
+                <span className="sm:hidden">+</span>
+                <span className="hidden sm:inline">Create Trip</span>
               </Link>
             </div>
           </div>
@@ -222,11 +243,11 @@ const TripsList = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">My Trips</h1>
-            <p className="mt-2 text-gray-600">
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-4 sm:py-6">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Trips</h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
               Manage and view all your travel plans in one place.
             </p>
           </div>
@@ -261,7 +282,7 @@ const TripsList = () => {
               <div className="mt-6">
                 <Link
                   to="/create-trip"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   <svg
                     className="-ml-1 mr-2 h-5 w-5"
@@ -307,13 +328,69 @@ const TripsCategories = ({
 }) => {
   const { upcoming, ongoing, completed } = trips;
 
+  const [publishLoading, setPublishLoading] = React.useState(null);
+
+  const makePublic = async (trip) => {
+    try {
+      setPublishLoading(trip._id);
+      // Check if itinerary exists
+      let itineraryExists = false;
+      const itRes = await fetch(
+        `http://localhost:5000/apis/itinerary/${trip._id}`
+      );
+      if (itRes.ok) {
+        itineraryExists = true;
+      }
+
+      if (!itineraryExists) {
+        // Create itinerary first
+        const createRes = await fetch(
+          "http://localhost:5000/apis/itinerary/create",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tripId: trip._id,
+              title: `${trip.name} Itinerary`,
+              description: trip.description || "",
+            }),
+          }
+        );
+        if (!createRes.ok) {
+          const txt = await createRes.text();
+          throw new Error(txt || "Failed to create itinerary");
+        }
+      }
+
+      // Update itinerary status to finalized (public)
+      const updateRes = await fetch(
+        `http://localhost:5000/apis/itinerary/${trip._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "finalized" }),
+        }
+      );
+      if (!updateRes.ok) {
+        const txt = await updateRes.text();
+        throw new Error(txt || "Failed to set itinerary public");
+      }
+      alert("Itinerary marked as public (finalized)");
+    } catch (err) {
+      console.error("Make public error:", err);
+      alert("Failed to make public: " + (err.message || "Unknown error"));
+    } finally {
+      setPublishLoading(null);
+    }
+  };
+
   const TripCard = ({ trip }) => {
     const tripStatus = getTripStatus(trip);
 
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
         {trip.coverPhoto && (
-          <div className="h-48 bg-gray-200">
+          <div className="h-40 sm:h-48 bg-gray-200">
             <img
               src={trip.coverPhoto}
               alt={trip.name}
@@ -322,7 +399,7 @@ const TripsCategories = ({
           </div>
         )}
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold text-gray-900 truncate">
               {trip.name}
@@ -398,14 +475,14 @@ const TripsCategories = ({
           </div>
 
           <div className="mt-4 space-y-2">
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               {tripStatus.status === "completed" ? (
                 <Link
                   to={`/itinerary/${trip._id}/view`}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-md text-sm font-medium"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
                 >
                   <svg
-                    className="w-4 h-4 inline mr-1"
+                    className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -423,15 +500,16 @@ const TripsCategories = ({
                       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                     />
                   </svg>
-                  View Itinerary
+                  <span className="hidden sm:inline">View Itinerary</span>
+                  <span className="sm:hidden">View</span>
                 </Link>
               ) : (
                 <Link
                   to={`/itinerary/${trip._id}`}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2 px-4 rounded-md text-sm font-medium"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
                 >
                   <svg
-                    className="w-4 h-4 inline mr-1"
+                    className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -443,36 +521,30 @@ const TripsCategories = ({
                       d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
                     />
                   </svg>
-                  Build Itinerary
+                  <span className="hidden sm:inline">Build Itinerary</span>
+                  <span className="sm:hidden">Build</span>
                 </Link>
               )}
-              <Link
-                to={`/trips/${trip._id}`}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 px-4 rounded-md text-sm font-medium"
+              <button
+                onClick={() => makePublic(trip)}
+                disabled={publishLoading === trip._id}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
               >
-                <svg
-                  className="w-4 h-4 inline mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                View Details
-              </Link>
+                {publishLoading === trip._id ? "Publishing..." : (
+                  <>
+                    <span className="hidden sm:inline">Make Public</span>
+                    <span className="sm:hidden">Public</span>
+                  </>
+                )}
+              </button>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <Link
                 to={`/trips/${trip._id}/edit`}
-                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-4 rounded-md text-sm font-medium"
+                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium"
               >
                 <svg
-                  className="w-4 h-4 inline mr-1"
+                  className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -489,11 +561,11 @@ const TripsCategories = ({
               <button
                 onClick={() => deleteTrip(trip._id, trip.name)}
                 disabled={deleteLoading === trip._id}
-                className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 text-center py-2 px-4 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 text-center py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {deleteLoading === trip._id ? (
                   <svg
-                    className="w-4 h-4 inline mr-1 animate-spin"
+                    className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -513,7 +585,7 @@ const TripsCategories = ({
                   </svg>
                 ) : (
                   <svg
-                    className="w-4 h-4 inline mr-1"
+                    className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -550,7 +622,7 @@ const TripsCategories = ({
           <p className="text-gray-500 italic">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {trips.map((trip) => (
             <TripCard key={trip._id} trip={trip} />
           ))}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const ChangePassword = () => {
-  const navigate = useNavigate();
+  // removed unused navigate
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     currentPassword: "",

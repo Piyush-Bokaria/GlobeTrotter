@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 const EditTrip = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    budget: '',
-    destination: ''
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    budget: "",
+    destination: "",
   });
   const [coverPhoto, setCoverPhoto] = useState(null);
   const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
   const [currentCoverPhoto, setCurrentCoverPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetchTrip();
@@ -26,30 +26,36 @@ const EditTrip = () => {
 
   const fetchTrip = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/apis/trips/${tripId}`);
-      
+      const response = await fetch(
+        `http://localhost:5000/apis/trips/${tripId}`
+      );
+
       if (response.ok) {
         const data = await response.json();
         const trip = data.trip;
-        
+
         setFormData({
-          name: trip.name || '',
-          description: trip.description || '',
-          startDate: trip.startDate ? new Date(trip.startDate).toISOString().split('T')[0] : '',
-          endDate: trip.endDate ? new Date(trip.endDate).toISOString().split('T')[0] : '',
-          budget: trip.budget || '',
-          destination: trip.destination || ''
+          name: trip.name || "",
+          description: trip.description || "",
+          startDate: trip.startDate
+            ? new Date(trip.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: trip.endDate
+            ? new Date(trip.endDate).toISOString().split("T")[0]
+            : "",
+          budget: trip.budget || "",
+          destination: trip.destination || "",
         });
-        
+
         if (trip.coverPhoto) {
           setCurrentCoverPhoto(trip.coverPhoto);
         }
       } else {
-        setError('Failed to load trip details');
+        setError("Failed to load trip details");
       }
     } catch (error) {
-      console.error('Error fetching trip:', error);
-      setError('Failed to load trip details');
+      console.error("Error fetching trip:", error);
+      setError("Failed to load trip details");
     } finally {
       setFetchLoading(false);
     }
@@ -58,7 +64,7 @@ const EditTrip = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -66,19 +72,19 @@ const EditTrip = () => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file');
+      if (!file.type.startsWith("image/")) {
+        setError("Please select a valid image file");
         return;
       }
-      
+
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image size should be less than 5MB');
+        setError("Image size should be less than 5MB");
         return;
       }
 
       setCoverPhoto(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -93,19 +99,24 @@ const EditTrip = () => {
     setCoverPhotoPreview(null);
     setCurrentCoverPhoto(null);
     // Reset file input
-    const fileInput = document.getElementById('coverPhoto');
-    if (fileInput) fileInput.value = '';
+    const fileInput = document.getElementById("coverPhoto");
+    if (fileInput) fileInput.value = "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setMessage('');
+    setError("");
+    setMessage("");
 
     // Validation
-    if (!formData.name.trim() || !formData.description.trim() || !formData.startDate || !formData.endDate) {
-      setError('Please fill in all required fields');
+    if (
+      !formData.name.trim() ||
+      !formData.description.trim() ||
+      !formData.startDate ||
+      !formData.endDate
+    ) {
+      setError("Please fill in all required fields");
       setLoading(false);
       return;
     }
@@ -115,7 +126,7 @@ const EditTrip = () => {
     const endDate = new Date(formData.endDate);
 
     if (endDate <= startDate) {
-      setError('End date must be after start date');
+      setError("End date must be after start date");
       setLoading(false);
       return;
     }
@@ -131,6 +142,14 @@ const EditTrip = () => {
         });
       }
 
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to edit trips.");
+        setLoading(false);
+        return;
+      }
+
       const tripData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
@@ -138,27 +157,32 @@ const EditTrip = () => {
         endDate: formData.endDate,
         budget: formData.budget ? parseFloat(formData.budget) : 0,
         destination: formData.destination.trim(),
-        coverPhoto: photoData
+        coverPhoto: photoData,
+        // No need to send userId - it will be extracted from JWT token
       };
 
-      console.log('Sending update trip request:', tripData);
+      console.log("Sending update trip request:", tripData);
 
-      const response = await fetch(`http://localhost:5000/apis/trips/${tripId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(tripData),
-      });
+      const response = await fetch(
+        `http://localhost:5000/apis/trips/${tripId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // Send JWT token
+          },
+          body: JSON.stringify(tripData),
+        }
+      );
 
-      console.log('Response status:', response.status);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('Error response:', errorText);
+        console.log("Error response:", errorText);
         try {
           const errorData = JSON.parse(errorText);
-          setError(errorData.message || 'Failed to update trip');
+          setError(errorData.message || "Failed to update trip");
         } catch {
           setError(`Server error: ${response.status}`);
         }
@@ -166,18 +190,19 @@ const EditTrip = () => {
       }
 
       const data = await response.json();
-      console.log('Success response:', data);
+      console.log("Success response:", data);
 
       setMessage(data.message);
-      
+
       // Redirect to trips list after successful update
       setTimeout(() => {
-        navigate('/trips');
+        navigate("/trips");
       }, 2000);
-
     } catch (error) {
-      console.error('Network error:', error);
-      setError(`Network error: ${error.message}. Make sure the server is running.`);
+      console.error("Network error:", error);
+      setError(
+        `Network error: ${error.message}. Make sure the server is running.`
+      );
     } finally {
       setLoading(false);
     }
@@ -198,7 +223,10 @@ const EditTrip = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/dashboard" className="text-xl font-semibold text-gray-900">
+              <Link
+                to="/dashboard"
+                className="text-xl font-semibold text-gray-900"
+              >
                 GlobeTrotter
               </Link>
             </div>
@@ -219,8 +247,18 @@ const EditTrip = () => {
                 to="/profile"
                 className="flex items-center text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
                 Profile
               </Link>
@@ -239,8 +277,18 @@ const EditTrip = () => {
                   to="/trips"
                   className="mr-4 text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </Link>
                 <h1 className="text-3xl font-bold text-gray-900">Edit Trip</h1>
@@ -253,7 +301,10 @@ const EditTrip = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Trip Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Trip Name *
                 </label>
                 <input
@@ -270,7 +321,10 @@ const EditTrip = () => {
 
               {/* Destination */}
               <div>
-                <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="destination"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Destination
                 </label>
                 <input
@@ -287,7 +341,10 @@ const EditTrip = () => {
               {/* Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Start Date *
                   </label>
                   <input
@@ -301,7 +358,10 @@ const EditTrip = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     End Date *
                   </label>
                   <input
@@ -318,7 +378,10 @@ const EditTrip = () => {
 
               {/* Budget */}
               <div>
-                <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="budget"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Budget (Optional)
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
@@ -341,7 +404,10 @@ const EditTrip = () => {
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Trip Description *
                 </label>
                 <textarea
@@ -374,8 +440,18 @@ const EditTrip = () => {
                         onClick={removePhoto}
                         className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -412,7 +488,9 @@ const EditTrip = () => {
                           </label>
                           <p className="pl-1">or drag and drop</p>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF up to 5MB
+                        </p>
                       </div>
                     </div>
                   )}
@@ -445,7 +523,7 @@ const EditTrip = () => {
                   disabled={loading}
                   className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Updating Trip...' : 'Update Trip'}
+                  {loading ? "Updating Trip..." : "Update Trip"}
                 </button>
               </div>
             </form>
